@@ -1,13 +1,17 @@
 import Head from "next/head";
-import styles from "../styles/Home.module.css";
-
+import { useSession, getSession } from "next-auth/client";
 import Button from "@material-tailwind/react/Button";
 import Icon from "@material-tailwind/react/Icon";
 import Image from "next/image";
-
 import Header from "../components/Header";
+import Login from "../components/Login";
+
 
 export default function Home() {
+
+    const [session] = useSession()
+    if(!session) return <Login />
+
   return (
     <div>
       <Head>
@@ -20,7 +24,7 @@ export default function Home() {
       </Head>
 
       <Header />
-      <section className="bg-[#f1f1f1] pb-10 px-10">
+      <section className="bg-[#2f2f2f] pb-10 px-10">
         <div className="max-w-3xl mx-auto">
           <div className="flex items-center justify-between py-6">
             <h2 className="text-gray-700 text-lg">Create a new document</h2>
@@ -55,4 +59,14 @@ export default function Home() {
       </section>
     </div>
   );
+}
+
+export async function getServerSideProps(context){
+  const session = await getSession(context)
+
+  return{
+    props: {
+      session,
+    },
+  }
 }

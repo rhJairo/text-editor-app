@@ -1,9 +1,12 @@
 import Button from "@material-tailwind/react/Button";
 import Icon from "@material-tailwind/react/Icon";
+import { useSession } from "next-auth/client";
 
 function Header() {
+  const [session] = useSession()
+
   return (
-    <header className="sticky top-0 z-50 flex items-center px-4 py-2 shadow-md bg-white">
+    <header className="sticky top-0 z-50 flex items-center px-4 py-2 shadow-md bg-gray-900">
       <Button
         color="gray"
         buttonType="outline"
@@ -19,8 +22,8 @@ function Header() {
         docs
       </h1>
       <div className="mx-5 md:mx-20 flex flex-grow items-center 
-      p-5 py-2 bg-gray-100 text-gray-600 rounded-lg focus-within:text-gray-600 focus-within:shadow-md">
-        <Icon name="search" size="3xl" color="gray"/>
+      p-5 py-2 bg-gray-700 text-gray-800 rounded-lg focus-within:text-gray-800 focus-within:shadow-md">
+        <Icon name="search" size="3xl" color="#0f0f0f"/>
         <input type="text" placeholder="Search" className="flex-grow px-5 text-base bg-transparent outline-none" />
       </div>
       <Button
@@ -36,7 +39,7 @@ function Header() {
       <img 
         loading="lazy"
         className="cursor-pointer h-12 w-12 rounded-full ml-12"
-        src=""
+        src={session?.user?.image}
         alt=""
       />
     </header>
