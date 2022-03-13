@@ -1,21 +1,41 @@
 import Head from "next/head";
-import { useSession, getSession } from "next-auth/client";
 import Button from "@material-tailwind/react/Button";
 import Icon from "@material-tailwind/react/Icon";
 import Image from "next/image";
 import Header from "../components/Header";
 import Login from "../components/Login";
+import firebase from "firebase";
+import { useSession, getSession } from "next-auth/client";
 import { Modal, ModalBody, ModalFooter } from "@material-tailwind/react";
 import { useState } from "react";
+import { db } from "../firebase";
+import { useCollectionOnce } from "react-firebase-hooks/firestore";
+import DocumentRow from "../components/DocumentRow";
 
 export default function Home() {
   const [session] = useSession();
   const [showModal, setShowModal] = useState(false);
-  const [input, setInput] = useState("")
+  const [input, setInput] = useState("");
+  const [snapshot] = useCollectionOnce(
+    db
+      .collection("userDocs")
+      .doc(session?.user.email)
+      .collection("docs")
+      .orderBy("timestamp", "desc")
+  );
 
   if (!session) return <Login />;
 
-  const createDocument = () => {};
+  const createDocument = () => {
+    if (!input) return;
+
+    db.collection("userDocs").doc(session.user.email).collection("docs").add({
+      fileName: input,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+    setInput(input);
+    setShowModal(false);
+  };
 
   const modal = (
     <Modal size="sm" active={showModal} toggler={() => setShowModal(false)}>
@@ -75,7 +95,10 @@ export default function Home() {
             </Button>
           </div>
           <div>
-            <div onClick={()=>setShowModal(true)} className="relative h-52 w-40 border-2 cursor-pointer hover:border-blue-500">
+            <div
+              onClick={() => setShowModal(true)}
+              className="relative h-52 w-40 border-2 cursor-pointer hover:border-blue-500"
+            >
               <Image src="https://links.papareact.com/pju" layout="fill" />
             </div>
 
@@ -91,6 +114,15 @@ export default function Home() {
             <Icon name="folder" size="3xl" color="gray" />
           </div>
         </div>
+
+        {snapshot?.docs.map((doc)=>(
+          <DocumentRow
+            key={doc.id}
+            id={doc.id}
+            fileName={doc.data().fileName}
+            date={doc.data().timestamp}
+          />
+        ))}
       </section>
     </div>
   );
