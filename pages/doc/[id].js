@@ -33,7 +33,7 @@ function Doc() {
           <Icon name="description" size="5xl" color="blue" />
         </span>
         <div className="flex-grow px-2">
-          <h2>{snapshot?.data()?.fileName}</h2>
+          <h2 className="text-gray-300">{snapshot?.data()?.fileName}</h2>
           <div className="flex items-center text-sm space-x-1 -ml-1 h-8 text-gray-600">
             <p className="option">File</p>
             <p className="option">Edit</p>
@@ -56,7 +56,7 @@ function Doc() {
         >
           <Icon name="people" size="md" /> SHARE
         </Button>
-        <img className="cursor-pointer rounded-full h-10 w-10 ml-2"
+        <img onClick={signOut} className="cursor-pointer rounded-full h-10 w-10 ml-2"
           src={session.user.image}
           alt=""
         />
