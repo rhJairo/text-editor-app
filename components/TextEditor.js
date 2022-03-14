@@ -1,27 +1,43 @@
 import dynamic from "next/dynamic";
+import { useEffect, useState } from "react";
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 import { EditorState } from "draft-js";
-import { useState } from "react";
 import { db } from "../firebase";
-import { useRouter } from "next/router";
-import { convertToRaw, convertFromRaw } from "draft-js";
+import { useRouter } from "next/dist/client/router";
+import { convertFromRaw, convertToRaw } from "draft-js";
 import { useSession } from "next-auth/client";
+import { useDocumentOnce } from "react-firebase-hooks/firestore";
 
-// import { Editor } from "react-draft-wysiwyg";
 const Editor = dynamic(
   () => import("react-draft-wysiwyg").then((module) => module.Editor),
   {
     ssr: false,
   }
 );
+
 function TextEditor() {
-  const [session] = useSession()
+  const [session] = useSession();
   const [editorState, setEditorState] = useState(EditorState.createEmpty());
   const router = useRouter();
   const { id } = router.query;
 
+  const [snapshot] = useDocumentOnce(
+    db.collection("userDocs").doc(session.user.email).collection("docs").doc(id)
+  );
+
+  useEffect(() => {
+    if (snapshot?.data()?.editorState) {
+      setEditorState(
+        EditorState.createWithContent(
+          convertFromRaw(snapshot?.data()?.editorState)
+        )
+      );
+    }
+  }, [snapshot]);
+
   const onEditorStateChange = (editorState) => {
     setEditorState(editorState);
+
     db.collection("userDocs")
       .doc(session.user.email)
       .collection("docs")
@@ -35,8 +51,9 @@ function TextEditor() {
         }
       );
   };
+
   return (
-    <div className="bg-[#dfdfdf] min-h-screen pg-16">
+    <div className="bg-[#F8F9FA] min-h-screen pb-16">
       <Editor
         editorState={editorState}
         onEditorStateChange={onEditorStateChange}
@@ -46,4 +63,5 @@ function TextEditor() {
     </div>
   );
 }
+
 export default TextEditor;
